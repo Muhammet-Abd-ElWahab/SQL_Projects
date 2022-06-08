@@ -1,0 +1,67 @@
+/* Query 1 */
+
+SELECT  (emp.FirstName  || ' ' || emp.LastName )as Employee_Name,
+		SUM( inv.total) as total_sales
+FROM Customer as cst
+JOIN Invoice as inv
+ON cst.CustomerId = inv.CustomerId
+JOIN Employee as emp
+ON emp.EmployeeId = cst.SupportRepId
+GROUP BY 1
+ORDER BY 2 desc
+
+
+
+/* Query 2 */
+
+SELECT  cst.Country as country,
+		SUM(inv.total) as total_sales
+FROM Customer as cst
+JOIN Invoice as inv
+ON cst.CustomerId = inv.CustomerId
+GROUP BY 1
+ORDER BY 2 desc
+LIMIT 5
+
+
+
+/* Query 3 */
+
+
+WITH t1 AS
+  (SELECT gen.Name AS genre_name,
+          art.Name AS artist_name,
+          COUNT(*) AS genre_count
+   FROM Track AS tra
+   JOIN Album AS alb ON alb.AlbumId = tra.AlbumId
+   JOIN Artist AS art ON art.ArtistId = alb.AlbumId
+   JOIN Genre AS gen ON gen.GenreId = tra.GenreId
+   JOIN InvoiceLine AS invl ON invl.TrackId = tra.TrackId
+   GROUP BY 1,
+            2
+   ORDER BY 3 DESC),
+     t2 AS
+  (SELECT t1.genre_name,
+          MAX (t1.genre_count) AS genre_max
+   FROM t1
+   GROUP BY 1
+   ORDER BY 2 DESC)
+SELECT (t1.artist_name || ' (' ||t1.genre_name|| ') ') AS genre_artist,
+       t1.genre_count
+FROM t1
+JOIN t2 ON t1.genre_name = t2.genre_name
+AND t1.genre_count= t2.genre_max
+LIMIT 10
+
+
+/* Query 4 */
+
+SELECT media.Name as media_type,
+       SUM(invl.UnitPrice * invl.Quantity) total_sales
+FROM Track as tra
+JOIN InvoiceLine as invl
+ON invl.TrackId = tra.TrackId
+JOIN MediaType as media
+ON media.MediaTypeId = tra.MediaTypeId
+GROUP BY 1
+ORDER BY 2 desc
